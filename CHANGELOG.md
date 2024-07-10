@@ -1,3 +1,7 @@
+0.6.0 - 29 June 2024
+===================
+- Adds support for mouse events.
+
 Released
 --------
 

@@ -1,5 +1,5 @@
 use edtui::{EditorTheme, EditorView};
-use ratatui::crossterm::event::{KeyCode, KeyEvent};
+use ratatui::crossterm::event::{Event, KeyCode};
 use ratatui::{
     prelude::*,
     widgets::{Block, BorderType, Borders, Widget},
@@ -16,13 +16,13 @@ impl<'a> Root<'a> {
         Self { context }
     }
 
-    pub fn handle_events(self, event: KeyEvent) {
+    pub fn handle_events(self, event: Event) {
         let input = &mut self.context.editor_input;
         let state = &mut self.context.editor_state;
 
-        match event.code {
-            KeyCode::Enter => {}
-            _ => input.on_key(event, state),
+        match event {
+            Event::Key(key) if key.code == KeyCode::Enter => {}
+            _ => input.on_event(event, state),
         }
     }
 }

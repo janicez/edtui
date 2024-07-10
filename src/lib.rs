@@ -71,12 +71,12 @@
 pub mod actions;
 pub mod clipboard;
 mod debug;
+pub mod events;
 mod helper;
-pub mod input;
 pub mod state;
 pub mod view;
 
-pub use input::EditorInput;
+pub use events::handler::EditorEventHandler;
 pub use state::{mode::EditorMode, EditorState};
 pub use view::{theme::EditorTheme, EditorStatusLine, EditorView};
 

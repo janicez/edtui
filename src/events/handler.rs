@@ -1,6 +1,5 @@
-//! Handles key input events
-pub mod key;
-pub mod register;
+use jagged::Index2;
+use ratatui::crossterm::event::Event as CTEvent;
 
 use crate::actions::search::StartSearch;
 use crate::actions::{
@@ -10,17 +9,20 @@ use crate::actions::{
     MoveWordBackward, MoveWordForward, Paste, Redo, RemoveChar, RemoveCharFromSearch,
     SelectBetween, SelectLine, StopSearch, SwitchMode, TriggerSearch, Undo,
 };
+use crate::helper::set_selection;
 use crate::{EditorMode, EditorState};
 
-use self::key::Key;
-use self::register::{Register, RegisterKey};
+use super::key::Key;
+use super::mouse::MouseEvent;
+use super::register::{Register, RegisterKey};
+use super::EditorEvent;
 
 #[derive(Clone, Debug)]
-pub struct EditorInput {
+pub struct EditorEventHandler {
     register: Register,
 }
 
-impl Default for EditorInput {
+impl Default for EditorEventHandler {
     #[allow(clippy::too_many_lines)]
     fn default() -> Self {
         let mut r = Register::new();
@@ -169,24 +171,64 @@ impl Default for EditorInput {
     }
 }
 
-impl EditorInput {
-    pub fn on_key<T>(&mut self, key: T, state: &mut EditorState)
-    where
-        T: Into<Key> + Copy,
-    {
+impl EditorEventHandler {
+    pub fn on_event(&mut self, event: CTEvent, state: &mut EditorState) {
+        let event = event.into();
+
+        match event {
+            EditorEvent::Key(key) => self.on_key(key, state),
+            EditorEvent::Mouse(mouse) => Self::on_mouse(mouse, state),
+            EditorEvent::None => {}
+        };
+    }
+
+    fn on_key(&mut self, key: Key, state: &mut EditorState) {
         let mode = state.mode;
 
-        match key.into() {
+        match key {
             // Always insert characters in insert mode
             Key::Char(c) if mode == EditorMode::Insert => InsertChar(c).execute(state),
             // Always add characters to search in search mode
             Key::Char(c) if mode == EditorMode::Search => AppendCharToSearch(c).execute(state),
             // Else lookup an action from the register
             _ => {
-                if let Some(mut action) = self.register.get(key.into(), mode) {
+                if let Some(mut action) = self.register.get(key, mode) {
                     action.execute(state);
                 }
             }
+        }
+    }
+
+    fn on_mouse(event: MouseEvent, state: &mut EditorState) {
+        if let MouseEvent::None = event {
+            return;
+        }
+
+        let screen = (state.view.screen_x, state.view.screen_x);
+
+        match event {
+            MouseEvent::Down(mouse) | MouseEvent::Up(mouse) | MouseEvent::Drag(mouse) => {
+                let cursor = Index2::new(
+                    mouse.row.saturating_sub(screen.0),
+                    mouse.col.saturating_sub(screen.1),
+                );
+                state.cursor = cursor;
+            }
+            MouseEvent::None => return,
+        };
+
+        if let MouseEvent::Down(_) = event {
+            state.selection = None;
+            if state.mode == EditorMode::Visual {
+                SwitchMode(EditorMode::Normal).execute(state);
+            }
+        }
+
+        if let MouseEvent::Drag(_) = event {
+            if state.mode != EditorMode::Visual {
+                SwitchMode(EditorMode::Visual).execute(state);
+            }
+            set_selection(&mut state.selection, state.cursor);
         }
     }
 }

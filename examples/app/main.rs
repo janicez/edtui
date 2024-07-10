@@ -1,5 +1,5 @@
-use edtui::{EditorInput, EditorState, Lines};
-use ratatui::crossterm::event::{self, Event, KeyCode};
+use edtui::{EditorEventHandler, EditorState, Lines};
+use ratatui::crossterm::event::{Event, KeyCode, KeyModifiers};
 use root::Root;
 use std::error::Error;
 use term::Term;
@@ -19,7 +19,7 @@ pub struct App {
 
 pub struct AppContext {
     editor_state: EditorState,
-    editor_input: EditorInput,
+    editor_input: EditorEventHandler,
 }
 
 impl AppContext {
@@ -38,11 +38,11 @@ Copy and paste text:
 
 Built-in search using the '/' command.
 
-This editor is under active development.
+This editor is under active development.🛠
 Don't hesitate to open issues or submit pull requests to contribute!
 ",
             )),
-            editor_input: EditorInput::default(),
+            editor_input: EditorEventHandler::default(),
         }
     }
 }
@@ -62,14 +62,24 @@ impl App {
         Ok(())
     }
 
+    /// Handles incoming events.
     fn handle_events(&mut self) -> Result<()> {
         let root = Root::new(&mut self.context);
-        if let Event::Key(event) = event::read()? {
-            match event.code {
-                KeyCode::Char('q') => self.should_quit = true,
-                _ => root.handle_events(event),
+
+        let event = ratatui::crossterm::event::read()?;
+
+        // If the ctrl 'c' key is pressed quit the application.
+        if let Event::Key(key) = event {
+            if key.code == KeyCode::Char('c') && key.modifiers == KeyModifiers::CONTROL {
+                self.should_quit = true;
+                return Ok(());
             }
         }
+
+        // Delegate the event handling to the event handler instance.
+        root.handle_events(event);
+
+        // Return a successful result.
         Ok(())
     }
 
