@@ -17,9 +17,9 @@ impl<'a> Root<'a> {
     }
 
     pub fn handle_events(self, event: Event) {
-        let input = &mut self.context.editor_input;
+        let handler = &mut self.context.editor_handler;
         let state = &mut self.context.editor_state;
-        input.on_event(event, state)
+        handler.on_event(event, state)
     }
 }
 

@@ -71,7 +71,7 @@ impl Widget for EditorView<'_, '_> {
 
         // Store the screen offset inside the state. This is required to calculate
         // mouse positions correctly.
-        self.state.view.set_screen_offset(area.x, area.y);
+        self.state.view.set_area_offset(area.x, area.y);
 
         // Update the view offset. Requuires the screen size and the position
         // of the cursor. Updates the view offset only if the cursor is out

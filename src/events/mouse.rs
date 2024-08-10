@@ -1,8 +1,63 @@
+use jagged::Index2;
 use ratatui::crossterm::event::{MouseEvent as CTMouseEvent, MouseEventKind};
+
+use crate::{
+    actions::{Execute, SwitchMode},
+    helper::{is_out_of_bounds, set_selection},
+    EditorMode, EditorState,
+};
+
+/// Handles a mouse event.
+#[derive(Clone, Debug, Default)]
+pub struct EditorMouse {}
+
+impl EditorMouse {
+    pub fn on_event<E>(event: E, state: &mut EditorState)
+    where
+        E: Into<MouseEvent>,
+    {
+        let event = event.into();
+        if let MouseEvent::None = event {
+            return;
+        }
+
+        let screen = (
+            state.view.area_x + state.view.buffer_x,
+            state.view.area_x + state.view.buffer_y,
+        );
+
+        match event {
+            MouseEvent::Down(mouse) | MouseEvent::Up(mouse) | MouseEvent::Drag(mouse) => {
+                let cursor = Index2::new(
+                    mouse.row.saturating_sub(screen.0),
+                    mouse.col.saturating_sub(screen.1),
+                );
+                if !is_out_of_bounds(&state.lines, &cursor) {
+                    state.cursor = cursor;
+                }
+            }
+            MouseEvent::None => return,
+        };
+
+        if let MouseEvent::Down(_) = event {
+            state.selection = None;
+            if state.mode == EditorMode::Visual {
+                SwitchMode(EditorMode::Normal).execute(state);
+            }
+        }
+
+        if let MouseEvent::Drag(_) = event {
+            if state.mode != EditorMode::Visual {
+                SwitchMode(EditorMode::Visual).execute(state);
+            }
+            set_selection(&mut state.selection, state.cursor);
+        }
+    }
+}
+
 /// Represents a mouse event.
-///
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-pub(crate) enum MouseEvent {
+pub enum MouseEvent {
     /// A mouse press event.
     Down(MousePosition),
 
@@ -28,7 +83,7 @@ impl From<CTMouseEvent> for MouseEvent {
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-pub(crate) struct MousePosition {
+pub struct MousePosition {
     /// The row that the event occurred on.
     pub(crate) row: usize,
     /// The column that the event occurred on.

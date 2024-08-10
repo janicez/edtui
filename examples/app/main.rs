@@ -1,4 +1,4 @@
-use edtui::{EditorEventHandler, EditorState, Lines};
+use edtui::{EditorHandler, EditorState, Lines};
 use ratatui::crossterm::event::{Event, KeyCode, KeyModifiers};
 use root::Root;
 use std::error::Error;
@@ -19,7 +19,7 @@ pub struct App {
 
 pub struct AppContext {
     editor_state: EditorState,
-    editor_input: EditorEventHandler,
+    editor_handler: EditorHandler,
 }
 
 impl AppContext {
@@ -42,7 +42,7 @@ This editor is under active development.🛠
 Don't hesitate to open issues or submit pull requests to contribute!
 ",
             )),
-            editor_input: EditorEventHandler::default(),
+            editor_handler: EditorHandler::default(),
         }
     }
 }

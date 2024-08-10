@@ -78,4 +78,15 @@ impl EditorState {
     pub fn set_clipboard(&mut self, clipboard: impl ClipboardTrait + 'static) {
         self.clip = Clipboard::new(clipboard);
     }
+
+    /// Sets the editors buffer position on the screen.
+    ///
+    /// Equivalent to the upper left coordinate of the buffer in the
+    /// global coordinate system.
+    ///
+    /// Necessary to correct mouse events.
+    pub fn set_buffer_offset<T: Into<usize>>(&mut self, x_offset: T, y_offset: T) {
+        self.view.buffer_x = x_offset.into();
+        self.view.buffer_y = y_offset.into();
+    }
 }

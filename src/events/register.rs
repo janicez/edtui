@@ -1,25 +1,8 @@
-use std::collections::HashMap;
+use crate::{actions::Action, EditorInput, EditorMode, EditorState};
 
-use crate::{actions::Action, EditorMode, EditorState};
+use super::key::KeyEvent;
 
-use super::key::Key;
-
-#[derive(Clone, Debug, Default)]
-pub struct Register {
-    lookup: Vec<Key>,
-    register: HashMap<RegisterKey, Action>,
-}
-
-impl Register {
-    /// Constructs a new Register
-    #[must_use]
-    pub fn new() -> Self {
-        Self {
-            lookup: Vec::new(),
-            register: HashMap::new(),
-        }
-    }
-
+impl EditorInput {
     /// Insert a new callback to the registry
     pub fn insert<T: Into<Action>>(&mut self, k: RegisterKey, v: T) {
         self.register.insert(k, v.into());
@@ -32,7 +15,7 @@ impl Register {
     /// If there is an exact match or if none of the keys in the registry
     /// starts with the current sequence, the lookup sequence is reset.
     #[must_use]
-    pub fn get(&mut self, c: Key, mode: EditorMode) -> Option<Action> {
+    pub fn get(&mut self, c: KeyEvent, mode: EditorMode) -> Option<Action> {
         let key = self.create_register_key(c, mode);
 
         match self
@@ -53,7 +36,7 @@ impl Register {
         }
     }
 
-    fn create_register_key(&mut self, c: Key, mode: EditorMode) -> RegisterKey {
+    fn create_register_key(&mut self, c: KeyEvent, mode: EditorMode) -> RegisterKey {
         self.lookup.push(c);
         RegisterKey::new(self.lookup.clone(), mode)
     }
@@ -61,7 +44,7 @@ impl Register {
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct RegisterKey {
-    pub keys: Vec<Key>,
+    pub keys: Vec<KeyEvent>,
     pub mode: EditorMode,
 }
 
@@ -73,7 +56,7 @@ pub struct RegisterVal(pub fn(&mut EditorState));
 impl RegisterKey {
     pub fn new<T>(key: T, mode: EditorMode) -> Self
     where
-        T: Into<Vec<Key>>,
+        T: Into<Vec<KeyEvent>>,
     {
         Self {
             keys: key.into(),
@@ -83,28 +66,28 @@ impl RegisterKey {
 
     pub fn n<T>(key: T) -> Self
     where
-        T: Into<Vec<Key>>,
+        T: Into<Vec<KeyEvent>>,
     {
         Self::new(key.into(), EditorMode::Normal)
     }
 
     pub fn v<T>(key: T) -> Self
     where
-        T: Into<Vec<Key>>,
+        T: Into<Vec<KeyEvent>>,
     {
         Self::new(key.into(), EditorMode::Visual)
     }
 
     pub fn i<T>(key: T) -> Self
     where
-        T: Into<Vec<Key>>,
+        T: Into<Vec<KeyEvent>>,
     {
         Self::new(key.into(), EditorMode::Insert)
     }
 
     pub fn s<T>(key: T) -> Self
     where
-        T: Into<Vec<Key>>,
+        T: Into<Vec<KeyEvent>>,
     {
         Self::new(key.into(), EditorMode::Search)
     }

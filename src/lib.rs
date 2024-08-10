@@ -76,11 +76,12 @@ mod helper;
 pub mod state;
 pub mod view;
 
-pub use events::handler::EditorEventHandler;
+pub use events::{handler::EditorHandler, input::EditorInput, mouse::EditorMouse};
 pub use state::{mode::EditorMode, EditorState};
 pub use view::{theme::EditorTheme, EditorStatusLine, EditorView};
 
-/// A data structure that contains chars organized in rows and columns
-pub type Lines = jagged::Jagged<char>;
 pub use jagged::index::RowIndex;
 pub use jagged::Index2;
+
+/// A data structure that contains chars organized in rows and columns
+pub type Lines = jagged::Jagged<char>;

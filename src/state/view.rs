@@ -9,19 +9,23 @@ pub(crate) struct ViewState {
     /// The y-coordinate offset of the viewport.
     viewport_y: usize,
     /// The horizontal offset of the editor's position on the screen.
-    pub(crate) screen_x: usize,
+    pub(crate) area_x: usize,
     /// The vertical offset of the editor's position on the screen.
-    pub(crate) screen_y: usize,
+    pub(crate) area_y: usize,
+    /// The horizontal offset of the editor's position on the screen.
+    pub(crate) buffer_x: usize,
+    /// The vertical offset of the editor's position on the screen.
+    pub(crate) buffer_y: usize,
 }
 
 impl ViewState {
     /// Sets the editors position on the screen.
     ///
     /// Equivalent to the upper left coordinate of the editor in the
-    /// global coordinate system.
-    pub(crate) fn set_screen_offset<T: Into<usize>>(&mut self, x_offset: T, y_offset: T) {
-        self.screen_x = x_offset.into();
-        self.screen_y = y_offset.into();
+    /// buffers coordinate system.
+    pub(crate) fn set_area_offset<T: Into<usize>>(&mut self, x_offset: T, y_offset: T) {
+        self.area_x = x_offset.into();
+        self.area_y = y_offset.into();
     }
 
     /// Updates the view's offset and returns the new offset.
@@ -92,8 +96,10 @@ mod tests {
             view: ViewState{
                 viewport_x: 0,
                 viewport_y: 1,
-                screen_x: 0,
-                screen_y: 0,
+                area_x: 0,
+                area_y: 0,
+                buffer_x: 0,
+                buffer_y: 0,
             },
             size: (1, 2),
             cursor: Index2::new(0, 0),
@@ -109,8 +115,10 @@ mod tests {
             view: ViewState{
                 viewport_x: 0,
                 viewport_y: 0,
-                screen_x: 0,
-                screen_y: 0,
+                area_x: 0,
+                area_y: 0,
+                buffer_x: 0,
+                buffer_y: 0,
             },
             size: (1, 2),
             cursor: Index2::new(2, 0),
@@ -123,8 +131,10 @@ mod tests {
             view: ViewState{
                 viewport_x: 1,
                 viewport_y: 0,
-                screen_x: 0,
-                screen_y: 0,
+                area_x: 0,
+                area_y: 0,
+                buffer_x: 0,
+                buffer_y: 0,
             },
             size: (2, 1),
             cursor: Index2::new(0, 0),
@@ -137,8 +147,10 @@ mod tests {
             view: ViewState{
                 viewport_x: 0,
                 viewport_y: 0,
-                screen_x: 0,
-                screen_y: 0,
+                area_x: 0,
+                area_y: 0,
+                buffer_x: 0,
+                buffer_y: 0,
             },
             size: (2, 1),
             cursor: Index2::new(0, 2),

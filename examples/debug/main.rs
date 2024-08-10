@@ -1,4 +1,4 @@
-use edtui::{EditorEventHandler, EditorState};
+use edtui::{EditorHandler, EditorState};
 use ratatui::crossterm::event::{Event, KeyCode, KeyModifiers};
 use root::Root;
 use std::error::Error;
@@ -19,14 +19,14 @@ pub struct App {
 
 pub struct AppContext {
     editor_state: EditorState,
-    editor_input: EditorEventHandler,
+    editor_handler: EditorHandler,
 }
 
 impl AppContext {
     pub fn new() -> Self {
         Self {
             editor_state: EditorState::default(),
-            editor_input: EditorEventHandler::default(),
+            editor_handler: EditorHandler::default(),
         }
     }
 }
